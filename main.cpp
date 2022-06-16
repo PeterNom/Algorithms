@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <vector>
 
 using namespace std;
 
@@ -31,12 +32,37 @@ public:
 
 int Node::name = 0;
 
+void link(Node *vertex , Node * head)
+{
+  cout << "There" << endl;
+  vertex->parent = head;
+}
+
+void make_vertex(int label, vector<Node*>* vertex)
+{
+  Node * temp1 = new Node(label);
+  Node * temp2 ;
+  vertex->push_back(temp1);
+  if(label==0)
+  {
+    temp2 = new Node(label+1);
+    vertex->push_back(temp2);
+  }
+  link(temp1, temp2);
+
+  cout << "Hello" << endl;
+  return ;
+}
+
+void findpath(Node *x , Node * y)
+{
+
+}
+
 int main() {
-  Node *test_1 = new Node(1);
+  vector<Node*> vertex;
 
-  cout << "Hello!" << test_1->name << " Type: " << test_1->type << " Label: " <<test_1->label <<endl;
+  make_vertex(0, &vertex);
 
-  Node *test_2 = new Node(0);
-
-  cout << "Hello!" << test_2->name << " Type: " <<test_2->type << " Label: " <<test_2->label << endl;
+  cout << "Name "<< vertex[0]->name << "Type "<< vertex[0]->type <<" Parent "<< vertex[0]->parent->label << "Type "<< vertex[0]->parent->type  << endl;
 }
