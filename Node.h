@@ -6,7 +6,7 @@
 class Node
 {
 public:
-  static int name;
+  static int name = 1;
   // Label if the node is Round
   int label;
   // False Round Node, True Square Round

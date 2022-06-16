@@ -1,28 +1,42 @@
-#include "Node.h"
-#include "Edge.h"
-#include "Graph.h"
+#include <iostream>
+#include <string>
 
 using namespace std;
 
-Node* maketree(int label)
+class Node
 {
-  if(label==0)
+public:
+  static int name;
+  // Label if the node is Round
+  int label;
+  // False Round Node, True Square Round
+  bool type;
+  // Parent Round Node is the Node is Square
+  Node * parent;
+
+  Node(int label):label(label)
   {
+    if(label==0)
+    {
+      name++;
+      type = true;
+    }
+    else
+    {
+      type = false;
+    }
   }
-}
 
-// Creates a graph with V vertices and E edges
-Graph* createGraph(int V, int E)
-{
-    Graph* graph = new Graph();
-    graph->V = V;
-    graph->E = E;
+};
 
-    return graph;
-}
+int Node::name = 0;
 
 int main() {
-  Node *test = new Node(1);
+  Node *test_1 = new Node(1);
 
-  cout << "Hello!" << endl;
+  cout << "Hello!" << test_1->name << " Type: " << test_1->type << " Label: " <<test_1->label <<endl;
+
+  Node *test_2 = new Node(0);
+
+  cout << "Hello!" << test_2->name << " Type: " <<test_2->type << " Label: " <<test_2->label << endl;
 }
