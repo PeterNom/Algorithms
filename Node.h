@@ -2,11 +2,14 @@
 #define NODE_H
 
 #include <iostream>
+#include <vector>
+
+using namespace std;
 
 class Node
 {
 public:
-  static int name = 1;
+  static int name;
   // Label if the node is Round
   int label;
   // False Round Node, True Square Round
@@ -14,8 +17,13 @@ public:
   // Parent Round Node is the Node is Square
   Node * parent;
 
-  Node(int label);
+  vector<Node*> children;
 
+  Node();
+
+  Node(char label);
+
+  void printInfo();
 };
 
 #endif

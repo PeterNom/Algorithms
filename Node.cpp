@@ -1,30 +1,28 @@
+#include "Node.h"
 #include <iostream>
 #include <string>
 
-class Node
-{
-public:
-  static int name;
-  // Label if the node is Round
-  int label;
-  // False Round Node, True Square Round
-  bool type;
-  // Parent Round Node is the Node is Square
-  Node * parent;
-
-  Node(int label):label(label)
-  {
-    if(label==0)
-    {
-      name++;
-      type = true;
-    }
-    else
-    {
-      type = false;
-    }
-  }
-
-};
+using namespace std;
 
 int Node::name = 0;
+
+Node::Node(): type(true), label(0)
+{
+  this->name++;
+}
+
+Node::Node(char label): label(label), type(false)
+{
+}
+
+void Node::printInfo()
+{
+  if(this->type)
+  {
+    cout << " This is a square node with name " << this->name << " and this label " << this->label << " and its father is " << (char)this->parent->label << endl;
+  }
+  else
+  {
+    cout << " This is a round node with name " << this->name << " and this label " << this->label << " and its father is " << (char)this->parent->label << endl;
+  }
+}
