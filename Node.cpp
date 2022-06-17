@@ -6,12 +6,12 @@ using namespace std;
 
 int Node::name = 0;
 
-Node::Node(): type(true), label(0)
+Node::Node(): type(true), label(0), parent(NULL)
 {
   this->name++;
 }
 
-Node::Node(char label): label(label), type(false)
+Node::Node(char label): label(label), type(false), parent(NULL)
 {
 }
 
