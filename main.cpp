@@ -125,9 +125,13 @@ void condensepath(vector<Node*> path, char new_label)
 
 }
 
-void evert()
+void evert(Node* vertex)
 {
-
+  if(vertex->parent)
+  {
+    vertex->children.push_back(vertex->parent);
+    vertex->parent = NULL;
+  }
 }
 
 char find_block(Node* vertex)
