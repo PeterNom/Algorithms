@@ -6,89 +6,58 @@
 
 using namespace std;
 
-class disjoinedSet{
-  int* rank;
-  int* parent;
-  int n;
-public:
-  disjoinedSet(int n)
-  {
-    this->n = n;
-  }
+vector<Node*> Array;
 
-  // Finds set of given item x
-  int find(int x)
-  {
-    // Finds the representative of the set
-    // that x is an element of
-    if (parent[x] != x) {
-    // if x is not the parent of itself
-    // Then x is not the representative of
-    // his set,
-    parent[x] = find(parent[x]);
-    // so we recursively call Find on its parent
-    // and move i's node directly under the
-    // representative of this set
+//returns true,if A and B are connected, else it will return false.
+bool find(int A, int B)
+{
+  if(Array[A]->name == Array[B]->name)
+    return true;
+  else
+    return false;
+}
+
+//change all entries from Array[ A ] to Array[ B ].
+void my_union(int A, int B)
+{
+    int TEMP = Array[A]->fname;
+    for(int i = 0; i < Array.size(); i++)
+    {
+      if(Array[i]->fname == TEMP)
+        Array[i]->fname = Array[B]->fname;
     }
-
-    return parent[x];
-  }
-  // Do union of two sets represented
-   // by x and y.
-   void Union(int x, int y)
-   {
-       // Find current sets of x and y
-       int xset = find(x);
-       int yset = find(y);
-
-       // If they are already in same set
-       if (xset == yset)
-           return;
-
-       // Put smaller ranked item under
-       // bigger ranked item if ranks are
-       // different
-       if (rank[xset] < rank[yset]) {
-           parent[xset] = yset;
-       }
-       else if (rank[xset] > rank[yset]) {
-           parent[yset] = xset;
-       }
-
-       // If ranks are same, then increment
-       // rank.
-       else {
-           parent[yset] = xset;
-           rank[xset] = rank[xset] + 1;
-       }
-   }
-};
+}
 
 void link(Node *child , Node * father)
 {
   child->parent = father;
   father->children.push_back(child);
+
+  my_union(child->name, father->name);
 }
 
-Node* maketree(char label)
+Node* maketree(int label)
 {
   if(label==0)
   {
     Node * square = new Node();
+    Array.push_back(square);
     return square;
   }
   else
   {
     Node * round = new Node(label);
+    Array.push_back(round);
     return round;
   }
 }
 
-Node* make_vertex(char label)
+Node* make_vertex(int label)
 {
   Node * square = maketree(0);
+  cout<< endl;
   Node * round  = maketree(label);
-
+  cout<< endl;
   link(square, round);
 
   return square;
@@ -102,6 +71,7 @@ vector<Node*> findpath(Node* x , Node* y)
     path.push_back(x->parent);
     return path;
   }
+
   int flag_2 = 1;
   int flag_1 = 1;
 
@@ -114,9 +84,9 @@ vector<Node*> findpath(Node* x , Node* y)
 
   while(flag_1+flag_2)
   {
-    cout << "Parent x Label " << (char) parentx->label << endl;
+    cout << "Parent x Label " << parentx->label << endl;
     path_1.push_back(parentx);
-    cout << "Parent y Label " << (char) parenty->label << endl;
+    cout << "Parent y Label " << parenty->label << endl;
     path_2.push_back(parenty);
 
     if(parentx->parent)
@@ -163,7 +133,7 @@ vector<Node*> findpath(Node* x , Node* y)
   return path_final;
 }
 
-void condensepath(vector<Node*> path, char new_label)
+void condensepath(vector<Node*> path, int new_label)
 {
   vector<Node*>::iterator ptr;
 
@@ -192,16 +162,35 @@ void evert(Node* vertex)
   }
 }
 
-char find_block(Node* vertex)
+int find_block(Node* vertex)
 {
   vector<Node*> path = findpath(vertex, vertex);
 
   return path[0]->label;
 }
 
-void insert_edge()
+void insert_edge(Node* A, Node* B)
 {
+  if(find(A->name, B->name))
+  {
+    int label = 5;
 
+    condensepath(findpath(A, B), label);
+  }
+  else
+  {
+    int x = findpath(A, A).size();
+    int y = findpath(B, B).size();
+    if(x>=y){
+      evert(A);
+      link(A, B);
+    }
+    else
+    {
+      evert(B);
+      link(B, A);
+    }
+  }
 }
 
 int main() {
@@ -210,31 +199,35 @@ int main() {
   vector<Node*> path;
   vector<Node*>::iterator ptr;
 
-  char block;
+  int block;
 
-  created_Node_1 = make_vertex('A');
-  created_Node_2 = make_vertex('B');
+  created_Node_1 = make_vertex(1);
+  cout<< endl;
+  created_Node_2 = make_vertex(2);
+  cout<< endl;
 
-  created_Node_1->printInfo();
+  Array[0]->printInfo();
+  Array[1]->printInfo();
+  Array[2]->printInfo();
+  Array[3]->printInfo();
+  cout<< endl;
 
-  created_Node_2->printInfo();
+  insert_edge(created_Node_1, created_Node_2);
 
-  link(created_Node_2->parent, created_Node_1->parent);
+  Array[0]->printInfo();
+  Array[1]->printInfo();
+  Array[2]->printInfo();
+  Array[3]->printInfo();
+  //link(created_Node_2->parent, created_Node_1->parent);
 
-  created_Node_1->printInfo();
+  //block = find_block(created_Node_1);
+  //cout<< "Found the block of Node 1 : " << block << endl;
 
-  created_Node_2->printInfo();
+  //block = find_block(created_Node_2);
+  //cout<< "Found the block of Node 2 : " << block << endl;
 
-  cout<< "Node B parent : " <<(char) created_Node_2->parent->parent->label << endl;
+  //path = findpath(created_Node_1, created_Node_2);
 
-  block = find_block(created_Node_1);
-  cout<< "Found the block of Node 1 : " << (char) block << endl;
-
-  block = find_block(created_Node_2);
-  cout<< "Found the block of Node 2 : " << (char) block << endl;
-
-  path = findpath(created_Node_1, created_Node_2);
-
-  for (ptr = path.begin(); ptr < path.end(); ptr++)
-        cout << (char) ptr[0]->label << " ";
+  //for (ptr = path.begin(); ptr < path.end(); ptr++)
+        //cout << ptr[0]->label << " ";
 }

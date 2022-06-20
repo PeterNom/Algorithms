@@ -4,25 +4,23 @@
 
 using namespace std;
 
-int Node::name = 0;
+int Node::counter = 0;
 
 Node::Node(): type(true), label(0), parent(NULL)
 {
-  this->name++;
+  this->name = Node::counter++;
+  this->fname = this->name;
+  cout<<"Square node's name: " << this->name << " and f name: "<< this->fname << endl;
 }
 
-Node::Node(char label): label(label), type(false), parent(NULL)
+Node::Node(int label): label(label), type(false), parent(NULL)
 {
+  this->name = Node::counter++;
+  this->fname = this->name;
+  cout<<"Round node's name: " << this->name << " and f name: "<< this->fname << endl;
 }
 
 void Node::printInfo()
 {
-  if(this->type)
-  {
-    cout << " This is a square node with name " << this->name << " and this label " << this->label << " and its father is " << (char)this->parent->label << endl;
-  }
-  else
-  {
-    cout << " This is a round node with name " << this->name << " and this label " << this->label << " and its father is " << (char)this->parent->label << endl;
-  }
+    cout<<"Node's name: " << this->name << " and f name: "<< this->fname << endl;
 }

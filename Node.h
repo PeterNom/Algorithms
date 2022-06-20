@@ -9,7 +9,10 @@ using namespace std;
 class Node
 {
 public:
-  static int name;
+  static int counter;
+
+  int name;
+  int fname;
   // Label if the node is Round
   int label;
   // False Round Node, True Square Round
@@ -21,7 +24,7 @@ public:
 
   Node();
 
-  Node(char label);
+  Node(int label);
 
   void printInfo();
 };
