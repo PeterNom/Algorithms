@@ -38,7 +38,7 @@ void link(Node *child , Node * father)
   child->parent = father;
   // Add the child to the parent's children list
   father->children.push_back(child);
-  std::cout << "Evert 6" << '\n';
+
   // Update the disjoint union set
   my_union(child->name, father->name);
 }
@@ -243,17 +243,34 @@ int find_block(Node* vertex)
 
 void insert_edge(Node* A, Node* B)
 {
-
+  // If the node are on the same compoments
   if(find(A->name, B->name))
   {
     int label = B->counter+1;
-    std::cout << "Insert Edge" << '\n';
+    // Condese the nodes along their path as a new cycle is created
     condensepath(findpath(A, B), label);
   }
   else
   {
-    int x = findpath(A, A).size();
-    int y = findpath(B, B).size();
+    // Else see which one is the bigger compoment
+    findpath(A, A);
+    findpath(B, B);
+    int x = 0;
+    int y = 0;
+
+    for(int i = 0; i < Array[0]->counter; i++)
+    {
+      if(Array[i]->fname == A->parent->name)
+      {
+        x++;
+      }
+      if(Array[i]->fname == B->parent->name)
+      {
+        y++;
+      }
+    }
+    //And link the smaller on to the bigger one after
+    //The small one has made its node the root of its componenet
     if(x>=y){
       evert(A);
       link(A, B);
@@ -267,12 +284,7 @@ void insert_edge(Node* A, Node* B)
 }
 
 int main() {
-  Node* created_Node_1;
-  Node* created_Node_2;
-  vector<Node*> path;
-  vector<Node*>::iterator ptr;
 
-  int block;
   for (int i = 1; i <= 20; i++)
   {
     make_vertex(i);
@@ -309,7 +321,7 @@ int main() {
   Array[1]->printInfo();
   Array[2]->printInfo();
   Array[3]->printInfo();
-  */
+
   //link(created_Node_2->parent, created_Node_1->parent);
 
   //block = find_block(created_Node_1);
@@ -322,4 +334,5 @@ int main() {
 
   //for (ptr = path.begin(); ptr < path.end(); ptr++)
         //cout << ptr[0]->label << " ";
+        */
 }
