@@ -24,5 +24,13 @@ Node::Node(int label): label(label), type(false), parent(NULL)
 
 void Node::printInfo()
 {
-    cout<<"Node's name: " << this->name << " and f name: "<< this->fname << endl;
+  if(this->label==0)
+  {
+    cout<<"Square Node: " << this->name << " and f name: "<< this->fname << endl;
+  }
+  else
+  {
+    cout<<"Round Node: " << this->name << " and f name: "<< this->fname << endl;
+  }
+
 }
