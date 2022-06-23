@@ -26,15 +26,20 @@ void my_union(int A, int B)
     for(int i = 0; i < Array[0]->counter; i++)
     {
       if(Array[i]->fname == TEMP)
+      {
         Array[i]->fname = Array[B]->fname;
+      }
     }
 }
 
 void link(Node *child , Node * father)
 {
+  // Set the father of the child
   child->parent = father;
+  // Add the child to the parent's children list
   father->children.push_back(child);
-
+  std::cout << "Evert 6" << '\n';
+  // Update the disjoint union set
   my_union(child->name, father->name);
 }
 
@@ -88,30 +93,35 @@ Node* make_vertex(int label)
 
 vector<Node*> findpath(Node* x , Node* y)
 {
+  // The nodes are the same
   if(x == y)
   {
+    // Simply return it's parent
     vector<Node*> path;
     path.push_back(x->parent);
     return path;
   }
 
+  // Flags to see when we have reached the end of a path
   int flag_2 = 1;
   int flag_1 = 1;
 
+  // The parents of the 2 nodes
   Node *parentx = x->parent;
   Node *parenty = y->parent;
 
+  // The paths
   vector<Node*> path_1;
   vector<Node*> path_2;
   vector<Node*> path_final;
 
   while(flag_1+flag_2)
   {
-    cout << "Parent x Label " << parentx->label << endl;
+    // We start by adding to eaches path their parents.
     path_1.push_back(parentx);
-    cout << "Parent y Label " << parenty->label << endl;
     path_2.push_back(parenty);
 
+    // While their parent has a parent we continue the search
     if(parentx->parent)
     {
       parentx = parentx->parent;
@@ -121,6 +131,7 @@ vector<Node*> findpath(Node* x , Node* y)
       flag_1=0;
     }
 
+    // While their parent has a parent we continue the search
     if(parenty->parent)
     {
       parenty = parenty->parent;
@@ -133,13 +144,19 @@ vector<Node*> findpath(Node* x , Node* y)
 
   Node* nearest_common_ancestor;
   int i = 0;
+
   for(; i < path_1.size(); i++)
   {
+    //We traverse the path from one node and check to see the first
+    // node that is also present in the path from the other node
     nearest_common_ancestor = path_1[i];
 
-    if (find(path_2.begin(), path_2.end(), nearest_common_ancestor) != path_2.end()) {
-        cout << "Element found";
-        break;
+    if (find(path_2.begin(), path_2.end(), nearest_common_ancestor) != path_2.end())
+    {
+      // Once found we break the loop and condense the two paths with the nearest_common_ancestor
+      // at the end
+      cout << "Element found";
+      break;
     }
   }
 
@@ -159,7 +176,7 @@ vector<Node*> findpath(Node* x , Node* y)
 void condensepath(vector<Node*> path, int new_label)
 {
   vector<Node*>::iterator ptr;
-
+  std::cout << "Condense Path" << '\n';
   Node * condensedvertex = make_vertex(new_label);
 
   condensedvertex->parent = path[path.size()-1]->parent;
@@ -193,10 +210,27 @@ void condensepath(vector<Node*> path, int new_label)
 
 void evert(Node* vertex)
 {
-  if(vertex->parent)
+  // If the node has a parent then
+  if(vertex->parent->parent)
   {
-    vertex->children.push_back(vertex->parent);
-    vertex->parent = NULL;
+    for(int i = 0; i < vertex->parent->parent->children.size(); i++)
+    {
+      // Erase the vertex from a child of its father.
+      if(vertex->parent->parent->children[i]==vertex->parent)
+      {
+        //erase the 7th element
+        vertex->parent->parent->children.erase(vertex->parent->parent->children.begin()+i);
+        break;
+      }
+    }
+
+    // Update the disjoint set union
+    Array[vertex->parent->name]->fname = vertex->parent->name;
+
+    // And now perform a link of the two nodes
+    link(vertex->parent->parent, vertex->parent);
+    //The new root node of its previous father.
+    vertex->parent->parent = NULL;
   }
 }
 
@@ -209,10 +243,11 @@ int find_block(Node* vertex)
 
 void insert_edge(Node* A, Node* B)
 {
+
   if(find(A->name, B->name))
   {
     int label = B->counter+1;
-
+    std::cout << "Insert Edge" << '\n';
     condensepath(findpath(A, B), label);
   }
   else
@@ -250,6 +285,7 @@ int main() {
   insert_edge(Array[20], Array[2]);
   insert_edge(Array[34], Array[38]);
   insert_edge(Array[4], Array[26]);
+  insert_edge(Array[2], Array[10]);
 
   for (int i = 0; i < 40; i++)
   {
