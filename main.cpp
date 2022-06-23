@@ -251,7 +251,7 @@ int main() {
   insert_edge(Array[34], Array[38]);
   insert_edge(Array[4], Array[26]);
 
-  for (int i = 0; i <= 20; i++)
+  for (int i = 0; i < 40; i++)
   {
     Array[i]->printInfo();
   }
