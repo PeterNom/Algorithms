@@ -10,8 +10,9 @@ class Node
 {
 public:
   static int counter;
-
+  //The name of the node for disjoint set
   int name;
+  //The value of the disjoint set array
   int fname;
   // Label if the node is Round
   int label;
@@ -19,7 +20,7 @@ public:
   bool type;
   // Parent Round Node is the Node is Square
   Node * parent;
-
+  // Array to hold the children of the node
   vector<Node*> children;
 
   Node();
