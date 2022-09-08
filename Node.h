@@ -12,8 +12,6 @@ public:
   static int counter;
   //The name of the node for disjoint set
   int name;
-  //The value of the disjoint set array
-  int fname;
   // Label if the node is Round
   int label;
   // False Round Node, True Square Round
@@ -23,9 +21,7 @@ public:
   // Array to hold the children of the node
   vector<Node*> children;
 
-  Node();
-
-  Node(int label);
+  Node(int label, bool n_type);
 
   void printInfo();
 };

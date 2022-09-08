@@ -6,31 +6,25 @@ using namespace std;
 
 int Node::counter = 0;
 
-Node::Node(): type(true), label(0), parent(NULL)
+Node::Node(int label, bool n_type): parent(NULL)
 {
   //Name of the node is a int incremented with every node created
   this->name = Node::counter++;
-  this->fname = this->name;
-  cout<<"Square node's name: " << this->name << " and f name: "<< this->fname << endl;
-}
-
-Node::Node(int label): label(label), type(false), parent(NULL)
-{
-  //Name of the node is a int incremented with every node created
-  this->name = Node::counter++;
-  this->fname = this->name;
-  cout<<"Round node's name: " << this->name << " and f name: "<< this->fname << endl;
+  this->type = n_type;
+  this->label = label;
 }
 
 void Node::printInfo()
 {
   if(this->label==0)
   {
-    cout<<"Square Node: " << this->name << " and f name: "<< this->fname << endl;
+    cout<<"Square Node: " << this->name << endl;
+    if(this->parent) cout<<"Parent Node: " << this->parent->name << endl;
   }
   else
   {
-    cout<<"Round Node: " << this->name << " and f name: "<< this->fname << endl;
+    cout<<"Round Node: " << this->name << endl;
+    if(this->parent) cout<<"Parent Node: " << this->parent->name << endl;
   }
 
 }

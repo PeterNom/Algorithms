@@ -2,34 +2,43 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <unordered_map>
+
 #include "Node.h"
 
 using namespace std;
 
-// disjoint set array
-vector<Node*> Array;
+// Disjoint Set Array
+unordered_map<int, int> parent;
 
-//returns true,if A and B are connected, else it will return false.
-bool find(int A, int B)
+// Node Array
+vector<Node*> Forest;
+
+void makeSet(int A)
 {
-
-  if(Array[A]->name == Array[B]->name)
-    return true;
-  else
-    return false;
+  parent[A] = A;
 }
 
-//change all entries from Array[ A ] to Array[ B ].
-void my_union(int A, int B)
+// Find the root of the set in which element `k` belongs
+int Find(int k)
 {
-    int TEMP = Array[A]->fname;
-    for(int i = 0; i < Array[0]->counter; i++)
+    // if `k` is root
+    if (parent[k] == k)
     {
-      if(Array[i]->fname == TEMP)
-      {
-        Array[i]->fname = Array[B]->fname;
-      }
+        return k;
     }
+    // recur for the parent until we find the root
+    return Find(parent[k]);
+}
+
+// Perform Union of two subsets
+void Union(int a, int b)
+{
+    // find the root of the sets in which elements `x` and `y` belongs
+    int x = Find(a);
+    int y = Find(b);
+
+    parent[x] = y;
 }
 
 void link(Node *child , Node * father)
@@ -40,7 +49,7 @@ void link(Node *child , Node * father)
   father->children.push_back(child);
 
   // Update the disjoint union set
-  my_union(child->name, father->name);
+  Union(child->name, father->name);
 }
 
 Node* maketree(int label)
@@ -48,31 +57,32 @@ Node* maketree(int label)
   // If label==0 we create a square node
   if(label==0)
   {
-    Node * square = new Node();
+    Node * square = new Node(label, true);
     //Check if we need to increase in size the disjoint set
-    if(Array.capacity()<= square->name)
+    if(Forest.capacity()<= square->name)
     {
-      Array.resize(Array.capacity()+10);
+      Forest.resize(Forest.capacity()+10);
     }
-    //populate the disjoined set
-    Array[square->name]= square;
+    //populate the Forest
+    Forest[square->name] = square;
+    makeSet(square->name);
+    //parent[square->name] = square->name;
 
     return square;
   }
   else
   {
-    Node * round = new Node(label);
-    cout<<"Array size " << Array.capacity() << endl;
-
+    Node * round = new Node(label, false);
     //Check if we need to increase in size the disjoint set
-    if(Array.capacity()<= round->name)
+    if(Forest.capacity()<= round->name)
     {
-      Array.resize(Array.capacity()+10);
+      Forest.resize(Forest.capacity()+10);
     }
-    //populate the disjoined set
-    Array[round->name]= round;
-    cout<<"Array size " << Array.capacity() << endl;
-    //Array.push_back(round);
+    //populate the Forest
+    Forest[round->name]= round;
+    makeSet(round->name);
+    //parent[round->name] = round->name;
+
     return round;
   }
 }
@@ -81,10 +91,8 @@ Node* make_vertex(int label)
 {
   // First we create the square node
   Node * square = maketree(0);
-  cout<< endl;
   // Then we create the round node
   Node * round  = maketree(label);
-  cout<< endl;
   // And finaly we link the two nodes with the round node as the father.
   link(square, round);
   // We return the square node.
@@ -155,7 +163,8 @@ vector<Node*> findpath(Node* x , Node* y)
     {
       // Once found we break the loop and condense the two paths with the nearest_common_ancestor
       // at the end
-      cout << "Element found";
+      cout << "Element found\n";
+      nearest_common_ancestor->printInfo();
       break;
     }
   }
@@ -175,37 +184,30 @@ vector<Node*> findpath(Node* x , Node* y)
 
 void condensepath(vector<Node*> path, int new_label)
 {
-  vector<Node*>::iterator ptr;
   std::cout << "Condense Path" << '\n';
-  Node * condensedvertex = make_vertex(new_label);
+  vector<Node*>::iterator ptr;
+  Node * condensedvertex = maketree(new_label);
 
-  condensedvertex->parent = path[path.size()-1]->parent;
-
-  if(Array.capacity()<= condensedvertex->name)
+  if(path[path.size()-1]->parent)
   {
-    Array.resize(Array.capacity()+10);
+    condensedvertex->parent = path[path.size()-1]->parent;
   }
+
+  if(Forest.capacity()<= condensedvertex->name)
+  {
+    Forest.resize(Forest.capacity()+10);
+  }
+
   //populate the disjoined set
-  Array[condensedvertex->name]= condensedvertex;
-  if(condensedvertex->parent->name)
-  {
-    Array[condensedvertex->name]->fname = condensedvertex->parent->name;
-  }
-  else
-  {
-    Array[condensedvertex->name]->fname = condensedvertex->name;
-  }
+  Forest[condensedvertex->name]= condensedvertex;
 
   for (ptr = path.begin(); ptr < path.end(); ptr++)
   {
-    //cout << (char) ptr[0]->label << " ";
     for (int i=0; i<ptr[0]->children.size(); i++)
     {
-      //condensedvertex->children.push_back(ptr[0]->children[i]);
       link(ptr[0]->children[i] , condensedvertex);
     }
   }
-
 }
 
 void evert(Node* vertex)
@@ -223,12 +225,11 @@ void evert(Node* vertex)
         break;
       }
     }
-
-    // Update the disjoint set union
-    Array[vertex->parent->name]->fname = vertex->parent->name;
-
+    //vertex->parent->parent->printInfo();
+    //vertex->parent->printInfo();
     // And now perform a link of the two nodes
     link(vertex->parent->parent, vertex->parent);
+
     //The new root node of its previous father.
     vertex->parent->parent = NULL;
   }
@@ -244,7 +245,7 @@ int find_block(Node* vertex)
 void insert_edge(Node* A, Node* B)
 {
   // If the node are on the same compoments
-  if(find(A->name, B->name))
+  if(Find(A->name)==Find(B->name))
   {
     int label = B->counter+1;
     // Condese the nodes along their path as a new cycle is created
@@ -258,81 +259,72 @@ void insert_edge(Node* A, Node* B)
     int x = 0;
     int y = 0;
 
-    for(int i = 0; i < Array[0]->counter; i++)
+    for( const std::pair<const int, int>& n : parent )
     {
-      if(Array[i]->fname == A->parent->name)
+      if(Find(n.second)==Find(A->name))
       {
         x++;
       }
-      if(Array[i]->fname == B->parent->name)
+      else if(Find(n.second)==Find(B->name))
       {
         y++;
       }
     }
     //And link the smaller on to the bigger one after
     //The small one has made its node the root of its componenet
+
     if(x>=y){
       evert(A);
-      link(A, B);
+      link(B->parent, A->parent);
     }
     else
     {
       evert(B);
-      link(B, A);
+      link(A->parent, B->parent);
     }
   }
 }
 
 int main() {
+  // Helper lambda function to print key-value pairs
+  auto print_key_value = [](const auto& key, const auto& value)
+  {
+    std::cout << "Key:[" << key << "] Value:[" << value << "]\n";
+  };
 
-  for (int i = 1; i <= 20; i++)
+  for (int i = 1; i <= 4; i++)
   {
     make_vertex(i);
   }
 
-  insert_edge(Array[0], Array[4]);
-  insert_edge(Array[2], Array[16]);
-  insert_edge(Array[12], Array[4]);
-  insert_edge(Array[8], Array[22]);
-  insert_edge(Array[20], Array[2]);
-  insert_edge(Array[34], Array[38]);
-  insert_edge(Array[4], Array[26]);
-  insert_edge(Array[2], Array[10]);
-
-  for (int i = 0; i < 40; i++)
+  insert_edge(Forest[0], Forest[2]);
+  for( const std::pair<const int, int>& n : parent )
   {
-    Array[i]->printInfo();
+    print_key_value(n.first, n.second);
   }
-  /*
-  created_Node_1 = make_vertex(1);
-  cout<< endl;
-  created_Node_2 = make_vertex(2);
-  cout<< endl;
-
-  Array[0]->printInfo();
-  Array[1]->printInfo();
-  Array[2]->printInfo();
-  Array[3]->printInfo();
-  cout<< endl;
-
-  insert_edge(created_Node_1, created_Node_2);
-
-  Array[0]->printInfo();
-  Array[1]->printInfo();
-  Array[2]->printInfo();
-  Array[3]->printInfo();
-
-  //link(created_Node_2->parent, created_Node_1->parent);
-
-  //block = find_block(created_Node_1);
-  //cout<< "Found the block of Node 1 : " << block << endl;
-
-  //block = find_block(created_Node_2);
-  //cout<< "Found the block of Node 2 : " << block << endl;
-
-  //path = findpath(created_Node_1, created_Node_2);
-
-  //for (ptr = path.begin(); ptr < path.end(); ptr++)
-        //cout << ptr[0]->label << " ";
-        */
+  insert_edge(Forest[2], Forest[4]);
+  for( const std::pair<const int, int>& n : parent )
+  {
+    print_key_value(n.first, n.second);
+  }
+  insert_edge(Forest[4], Forest[6]);
+  for( const std::pair<const int, int>& n : parent )
+  {
+    print_key_value(n.first, n.second);
+  }
+  insert_edge(Forest[2], Forest[6]);
+  for( const std::pair<const int, int>& n : parent )
+  {
+    print_key_value(n.first, n.second);
+  }
+/*
+  Forest[0]->printInfo();
+  Forest[1]->printInfo();
+  Forest[2]->printInfo();
+  Forest[3]->printInfo();
+  Forest[4]->printInfo();
+  Forest[5]->printInfo();
+  Forest[6]->printInfo();
+  Forest[7]->printInfo();
+  */
 }
