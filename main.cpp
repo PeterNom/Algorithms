@@ -10,6 +10,8 @@ using namespace std;
 
 // Disjoint Set Array
 unordered_map<int, int> parent;
+// stores the depth of trees
+unordered_map<int, int> ranking;
 
 // Node Array
 vector<Node*> Forest;
@@ -17,28 +19,38 @@ vector<Node*> Forest;
 void makeSet(int A)
 {
   parent[A] = A;
+  ranking[A] = 0;
 }
 
 // Find the root of the set in which element `k` belongs
 int Find(int k)
 {
-    // if `k` is root
-    if (parent[k] == k)
-    {
-        return k;
-    }
-    // recur for the parent until we find the root
-    return Find(parent[k]);
+  if(parent[k]<0)
+  {
+    return 0;
+  }
+  // if `k` is not the root
+  if (parent[k] != k)
+  {
+    // path compression
+    parent[k] = Find(parent[k]);
+  }
+  // recur for the parent until we find the root
+  return parent[k];
 }
 
 // Perform Union of two subsets
 void Union(int a, int b)
 {
-    // find the root of the sets in which elements `x` and `y` belongs
-    int x = Find(a);
-    int y = Find(b);
+  // find the root of the sets in which elements `x` and `y` belongs
+  int x = Find(a);
+  int y = Find(b);
 
-    parent[x] = y;
+  // if `x` and `y` are present in the same set
+  if (x == y) return;
+
+  parent[x] = y;
+  ranking[y]++;
 }
 
 void link(Node *child , Node * father)
@@ -200,12 +212,30 @@ void condensepath(vector<Node*> path, int new_label)
 
   //populate the disjoined set
   Forest[condensedvertex->name]= condensedvertex;
-
+  vector<Node*> kids;
   for (ptr = path.begin(); ptr < path.end(); ptr++)
   {
     for (int i=0; i<ptr[0]->children.size(); i++)
     {
-      link(ptr[0]->children[i] , condensedvertex);
+      if(ptr[0]->children[i]->type)
+      {
+        kids.push_back(ptr[0]->children[i]);
+        //link(ptr[0]->children[i] , condensedvertex);
+      }
+      //link(ptr[0]->children[i] , condensedvertex);
+    }
+  }
+
+  for(int i = 0; i <kids.size(); i++)
+  {
+    kids[i]->printInfo();
+    link(kids[i], condensedvertex);
+  }
+  for (ptr = path.begin(); ptr < path.end(); ptr++)
+  {
+    if(!(ptr[0]->type))
+    {
+      parent[ptr[0]->name] = -1;
     }
   }
 }
@@ -254,11 +284,11 @@ void insert_edge(Node* A, Node* B)
   else
   {
     // Else see which one is the bigger compoment
-    findpath(A, A);
-    findpath(B, B);
+    //findpath(A, A);
+    //findpath(B, B);
     int x = 0;
     int y = 0;
-
+/*
     for( const std::pair<const int, int>& n : parent )
     {
       if(Find(n.second)==Find(A->name))
@@ -270,6 +300,9 @@ void insert_edge(Node* A, Node* B)
         y++;
       }
     }
+*/
+    x = ranking[Find(A->name)];
+    y = ranking[Find(B->name)];
     //And link the smaller on to the bigger one after
     //The small one has made its node the root of its componenet
 
