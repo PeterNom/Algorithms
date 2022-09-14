@@ -16,6 +16,23 @@ unordered_map<int, int> ranking;
 // Node Array
 vector<Node*> Forest;
 
+void printGraph()
+{
+  vector<Node*>::iterator ptr;
+  vector<Node*>::iterator chl;
+
+  for (ptr = Forest.begin(); ptr < Forest.end(); ptr++)
+  {
+    if(ptr[0]->type) continue;
+    if(parent[ptr[0]->name]==-1) continue;
+    for(chl = ptr[0]->children.begin(); chl < ptr[0]->children.end(); chl++)
+    {
+      std::cout << ptr[0]->name << " -- " << chl[0]->name<<'\n';
+    }
+    std::cout << ptr[0]->name << "[shape=box, color=yellow];"<<'\n';
+  }
+}
+
 void makeSet(int A)
 {
   parent[A] = A;
@@ -76,7 +93,6 @@ void link(Node *child , Node * father)
 
 Node* maketree(int label)
 {
-
   // If label==0 we create a square node
   if(label==0)
   {
@@ -212,7 +228,8 @@ void condensepath(vector<Node*> path, int new_label)
 
   if(path[path.size()-1]->parent)
   {
-    condensedvertex->parent = path[path.size()-1]->parent;
+    link( condensedvertex, path[path.size()-1]->parent);
+    //condensedvertex->parent = path[path.size()-1]->parent;
   }
 
   if(Forest.capacity()<= condensedvertex->name)
@@ -348,7 +365,10 @@ int find_block(Node* vertex)
 
 void insert_edge(Node* A, Node* B)
 {
+  if(!(A->type) || !(B->type)) return;
+
   if(A->parent==B->parent) return;
+
   // If the node are on the same compoments
   if(Find(A->name)==Find(B->name))
   {
@@ -389,10 +409,15 @@ int main() {
   insert_edge(Forest[2], Forest[4]);
   insert_edge(Forest[4], Forest[6]);
   insert_edge(Forest[2], Forest[6]);
+  for (int i = 9; i <= 11; i++)
+  {
+    make_vertex(i);
+  }
   for( const std::pair<const int, int>& n : parent )
   {
     print_key_value(n.first, n.second);
   }
+  printGraph();
 /*
   insert_edge(Forest[0], Forest[2]);
   for( const std::pair<const int, int>& n : parent )
