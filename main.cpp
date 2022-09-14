@@ -19,15 +19,16 @@ vector<Node*> Forest;
 void makeSet(int A)
 {
   parent[A] = A;
-  ranking[A] = 0;
+  ranking[A] = 1;
 }
 
 // Find the root of the set in which element `k` belongs
 int Find(int k)
 {
-  if(parent[k]<0)
+
+  if(parent[k]==-1)
   {
-    return 0;
+    return -1;
   }
   // if `k` is not the root
   if (parent[k] != k)
@@ -37,6 +38,15 @@ int Find(int k)
   }
   // recur for the parent until we find the root
   return parent[k];
+/*
+  if (parent[k] == k)
+  {
+    return k;
+  }
+
+  // recur for the parent until we find the root
+  return Find(parent[k]);
+  */
 }
 
 // Perform Union of two subsets
@@ -66,6 +76,7 @@ void link(Node *child , Node * father)
 
 Node* maketree(int label)
 {
+
   // If label==0 we create a square node
   if(label==0)
   {
@@ -78,23 +89,22 @@ Node* maketree(int label)
     //populate the Forest
     Forest[square->name] = square;
     makeSet(square->name);
-    //parent[square->name] = square->name;
 
     return square;
   }
   else
   {
     Node * round = new Node(label, false);
+
     //Check if we need to increase in size the disjoint set
     if(Forest.capacity()<= round->name)
     {
       Forest.resize(Forest.capacity()+10);
     }
+
     //populate the Forest
     Forest[round->name]= round;
     makeSet(round->name);
-    //parent[round->name] = round->name;
-
     return round;
   }
 }
@@ -212,25 +222,27 @@ void condensepath(vector<Node*> path, int new_label)
 
   //populate the disjoined set
   Forest[condensedvertex->name]= condensedvertex;
-  vector<Node*> kids;
+
   for (ptr = path.begin(); ptr < path.end(); ptr++)
   {
     for (int i=0; i<ptr[0]->children.size(); i++)
     {
       if(ptr[0]->children[i]->type)
       {
-        kids.push_back(ptr[0]->children[i]);
-        //link(ptr[0]->children[i] , condensedvertex);
+        link(ptr[0]->children[i], condensedvertex);
+        ptr[0]->children[i]->printInfo();
+        condensedvertex->printInfo();
       }
-      //link(ptr[0]->children[i] , condensedvertex);
     }
   }
-
+/*
   for(int i = 0; i <kids.size(); i++)
   {
     kids[i]->printInfo();
     link(kids[i], condensedvertex);
   }
+*/
+
   for (ptr = path.begin(); ptr < path.end(); ptr++)
   {
     if(!(ptr[0]->type))
@@ -242,7 +254,66 @@ void condensepath(vector<Node*> path, int new_label)
 
 void evert(Node* vertex)
 {
-  // If the node has a parent then
+  // If the node is round this node becames root
+  // else the parent of the square node becames root
+  Node* root;
+  int temp, prev;
+
+  if(!vertex->type)
+  {
+    std::cout<<"Round"<<std::endl;
+    root = vertex;
+    root->printInfo();
+  }
+  else
+  {
+    std::cout<<"Square"<<std::endl;
+    root = vertex->parent;
+    root->printInfo();
+  }
+  if(parent[root->name]==root->name) return;
+
+  std::cout<<"Step 1"<<std::endl;
+  temp = root->parent->name;
+  std::cout<<"Temp"<< temp <<std::endl;
+  root->parent=NULL;
+  root->printInfo();
+  root->children.push_back(Forest[temp]);
+  root->printInfo();
+  prev = root->name;
+  std::cout<<"Step 2"<<std::endl;
+  while(Forest[temp])
+  {
+    int ancestor;
+
+    ancestor = Forest[temp]->parent->name;
+    Forest[temp]->parent = Forest[prev];
+    Forest[temp]->children.push_back(Forest[ancestor]);
+
+    for(int i = 0; i < Forest[temp]->children.size(); i++)
+    {
+      if(Forest[temp]->children[i] == Forest[ancestor])
+      {
+        Forest[temp]->children.erase(Forest[temp]->children.begin()+i);
+        break;
+      }
+    }
+
+    parent[temp] = root->name;
+
+    temp = ancestor;
+  }
+  /*
+  for(int i = 0; i < root->parent->parent->children.size(); i++)
+  {
+    // Erase the vertex from a child of its father.
+    if(vertex->parent->parent->children[i]==vertex->parent)
+    {
+      //erase the 7th element
+      vertex->parent->parent->children.erase(vertex->parent->parent->children.begin()+i);
+      break;
+    }
+  }
   if(vertex->parent->parent)
   {
     for(int i = 0; i < vertex->parent->parent->children.size(); i++)
@@ -255,14 +326,17 @@ void evert(Node* vertex)
         break;
       }
     }
-    //vertex->parent->parent->printInfo();
-    //vertex->parent->printInfo();
+
+    vertex->parent->parent->printInfo();
+    vertex->parent->printInfo();
+
     // And now perform a link of the two nodes
     link(vertex->parent->parent, vertex->parent);
 
     //The new root node of its previous father.
     vertex->parent->parent = NULL;
   }
+  */
 }
 
 int find_block(Node* vertex)
@@ -274,6 +348,7 @@ int find_block(Node* vertex)
 
 void insert_edge(Node* A, Node* B)
 {
+  if(A->parent==B->parent) return;
   // If the node are on the same compoments
   if(Find(A->name)==Find(B->name))
   {
@@ -283,36 +358,16 @@ void insert_edge(Node* A, Node* B)
   }
   else
   {
-    // Else see which one is the bigger compoment
-    //findpath(A, A);
-    //findpath(B, B);
-    int x = 0;
-    int y = 0;
-/*
-    for( const std::pair<const int, int>& n : parent )
-    {
-      if(Find(n.second)==Find(A->name))
-      {
-        x++;
-      }
-      else if(Find(n.second)==Find(B->name))
-      {
-        y++;
-      }
-    }
-*/
-    x = ranking[Find(A->name)];
-    y = ranking[Find(B->name)];
     //And link the smaller on to the bigger one after
     //The small one has made its node the root of its componenet
 
-    if(x>=y){
-      evert(A);
+    if(ranking[Find(A->name)]>=ranking[Find(B->name)]){
+      evert(B);
       link(B->parent, A->parent);
     }
     else
     {
-      evert(B);
+      evert(A);
       link(A->parent, B->parent);
     }
   }
@@ -330,6 +385,15 @@ int main() {
     make_vertex(i);
   }
 
+  insert_edge(Forest[0], Forest[2]);
+  insert_edge(Forest[2], Forest[4]);
+  insert_edge(Forest[4], Forest[6]);
+  insert_edge(Forest[2], Forest[6]);
+  for( const std::pair<const int, int>& n : parent )
+  {
+    print_key_value(n.first, n.second);
+  }
+/*
   insert_edge(Forest[0], Forest[2]);
   for( const std::pair<const int, int>& n : parent )
   {
@@ -350,7 +414,7 @@ int main() {
   {
     print_key_value(n.first, n.second);
   }
-/*
+
   Forest[0]->printInfo();
   Forest[1]->printInfo();
   Forest[2]->printInfo();
