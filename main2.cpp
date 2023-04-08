@@ -258,46 +258,89 @@ void condensepath(vector<Node*> path, int new_label)
 
 void evert(Node* vertex)
 {
-  // If the node is round this node becames root
-  // else the parent of the square node becames root
   Node* root;
   int temp, prev;
 
-  root = vertex;
-    
-  root->printInfo();
+  // If the node is round this node becames root
+  if(!vertex->type)
+  {
+    std::cout<<"Round"<<std::endl;
+    root = vertex;
+    root->printInfo();
+  }
+  // Else the parent of the square node becames root
+  else
+  {
+    std::cout<<"Square"<<std::endl;
+    root = vertex->parent;
+    root->printInfo();
+  }
 
+  // If the node to be made the new root is already the root return
   if(parent[root->name]==root->name) return;
 
-  std::cout<<"Step 1"<<std::endl;
+  // we keep the parent of the root before we clear it
   temp = root->parent->name;
-  std::cout<<"Temp"<< temp <<std::endl;
+
+  // We clear the new root parent pointer to null
   root->parent=NULL;
-  root->printInfo();
+
+  // We make the father of the root its child
   root->children.push_back(Forest[temp]);
-  root->printInfo();
+
+  // Erase the root from the child list of its previous parent
+  for(int i = 0; i < Forest[temp]->children.size(); i++)
+  {
+    if(Forest[temp]->children[i] == root)
+    {
+      Forest[temp]->children.erase(Forest[temp]->children.begin()+i);
+      break;
+    }
+  }
+
+  // we keep track of the vertex we have already process
   prev = root->name;
-  std::cout<<"Step 2"<<std::endl;
+
+  // Now moving backwards from the parent of the new root
   while(Forest[temp])
   {
     int ancestor;
-
-    ancestor = Forest[temp]->parent->name;
-    Forest[temp]->parent = Forest[prev];
-    Forest[temp]->children.push_back(Forest[ancestor]);
-
-    for(int i = 0; i < Forest[temp]->children.size(); i++)
+    
+    if(Forest[temp]->parent)
     {
-      if(Forest[temp]->children[i] == Forest[ancestor])
+      // We hold the its parent vertex
+      ancestor = Forest[temp]->parent->name;
+
+      // We update the vertex parent that of the previous processed vertex
+      Forest[temp]->parent = Forest[prev];
+      // We make its previous parent its child
+      Forest[temp]->children.push_back(Forest[ancestor]);
+
+      // Then we iterate the children list of its previous father to find and erase its previous child that is now its parent
+      for(int i = 0; i < Forest[ancestor]->children.size(); i++)
       {
-        Forest[temp]->children.erase(Forest[temp]->children.begin()+i);
-        break;
+        if(Forest[ancestor]->children[i] == Forest[temp])
+        {
+         Forest[ancestor]->children.erase(Forest[ancestor]->children.begin()+i);
+         break;
+        }
       }
+      // We Update the Disjoint Union Set data structure
+      parent[temp] = root->name;
+
+      // We update the node so that prev is the node we just processed and temp holds the parent of that node that will be processed next
+      prev = temp;
+      temp = ancestor;
     }
-
-    parent[temp] = root->name;
-
-    temp = ancestor;
+    else
+    {
+      // We update the vertex parent that of the previous processed vertex
+      Forest[temp]->parent = Forest[prev];
+      // We Update the Disjoint Union Set data structure
+      parent[temp] = root->name;
+      break;
+    }
+   
   }
 }
 
